@@ -1,0 +1,19 @@
+package com.goodfellas.backend.security;
+
+import org.springframework.stereotype.Component;
+import jakarta.annotation.PostConstruct;
+
+@Component
+public class SecurityConstants
+{
+    public static String JWT_SECRET;
+    public static long JWT_EXPIRATION;
+
+    @PostConstruct
+    public void init()
+    {
+        //foarte bun stiu
+        JWT_SECRET = "SECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRETSECRET";
+        JWT_EXPIRATION = 3600;
+    }
+}
