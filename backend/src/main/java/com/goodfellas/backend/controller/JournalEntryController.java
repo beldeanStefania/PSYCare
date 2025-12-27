@@ -2,6 +2,7 @@ package com.goodfellas.backend.controller;
 
 import com.goodfellas.backend.dto.JournalEntryDTO;
 import com.goodfellas.backend.service.JournalEntryService;
+import com.goodfellas.backend.service.PsychologistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,13 @@ public class JournalEntryController {
 
     private final JournalEntryService journalService;
 
+    private final PsychologistService psychologistService;
+
     @Autowired
-    public JournalEntryController(JournalEntryService journalService)
+    public JournalEntryController(JournalEntryService journalService, PsychologistService psychologistService)
     {
         this.journalService = journalService;
+        this.psychologistService = psychologistService;
     }
 
     @GetMapping
@@ -32,6 +36,15 @@ public class JournalEntryController {
     public ResponseEntity<JournalEntryDTO> getMyEntry(@PathVariable int id, Authentication authentication)
     {
         return ResponseEntity.ok(journalService.getEntry(authentication.getName(), id));
+    }
+
+    @GetMapping("/shared")
+    public ResponseEntity<List<JournalEntryDTO>> getSharedJournalEntries(
+            Authentication authentication) {
+
+        return ResponseEntity.ok(
+                psychologistService.getSharedJournalEntries(authentication.getName())
+        );
     }
 
     @PostMapping

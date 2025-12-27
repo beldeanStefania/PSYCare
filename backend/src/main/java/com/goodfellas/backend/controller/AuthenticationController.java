@@ -3,6 +3,7 @@ package com.goodfellas.backend.controller;
 import com.goodfellas.backend.dto.AuthResponseDTO;
 import com.goodfellas.backend.dto.LoginDTO;
 import com.goodfellas.backend.dto.PatientRegisterDTO;
+import com.goodfellas.backend.dto.RegisterDTO;
 import com.goodfellas.backend.model.Patient;
 import com.goodfellas.backend.model.Psychologist;
 import com.goodfellas.backend.repository.PatientRepository;
@@ -84,11 +85,6 @@ public class AuthenticationController
         }
     }
 
-    /*
-    @PostMapping("register/psychologist")
-    public ResponseEntity<String> registerPsychologist(@RequestBody PsychologistRegisterDTO registerDTO) {
-    }
-*/
     @PostMapping("register/patient")
     public ResponseEntity<String> registerPatient(@RequestBody PatientRegisterDTO registerDTO) {
         try
@@ -109,6 +105,32 @@ public class AuthenticationController
             patient.setLastName(registerDTO.getLastName());
             patientRepository.save(patient);
             return new ResponseEntity<>("Patient registered successfully!", HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            return new ResponseEntity<>("An error occurred during registration: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("register/psychologist")
+    public ResponseEntity<String> registerPsychologist(@RequestBody RegisterDTO registerDTO) {
+        try
+        {
+            if (psychologistRepository.existsByUsername(registerDTO.getUsername()))
+            {
+                return new ResponseEntity<>("Error: Username is already taken!", HttpStatus.BAD_REQUEST);
+            }
+            if (!isValidPassword(registerDTO.getPassword()))
+            {
+                return new ResponseEntity<>("Error: Password must contain at least one uppercase letter, one lowercase letter, and one special character (#, %, or *)", HttpStatus.BAD_REQUEST);
+            }
+            var psychologist = new Psychologist();
+            psychologist.setUsername(registerDTO.getUsername());
+            psychologist.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+            psychologist.setFirstName(registerDTO.getFirstName());
+            psychologist.setLastName(registerDTO.getLastName());
+            psychologistRepository.save(psychologist);
+            return new ResponseEntity<>("Psychologist registered successfully!", HttpStatus.OK);
         }
         catch (Exception e)
         {
