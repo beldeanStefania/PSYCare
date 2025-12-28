@@ -47,6 +47,28 @@ public class AuthenticationController
         this.passwordEncoder = passwordEncoder;
     }
 
+
+    /**
+     ENDPOINT: POST /auth/login
+     FUNCTION: Validates credentials, creates a security session, and issues a JWT token. It also fetches the specific profile data based on the user's role (Psychologist or Patient).
+     @param loginDTO The DTO containing the username and password provided by the user.
+     INPUT (JSON):
+     {
+     "username": "johndoe",
+     "password": "Password123*"
+     }
+     @return A ResponseEntity containing the JWT token, role, and user profile data if successful; otherwise an error message.
+     OUTPUT:
+     - 200 OK: Returns an AuthResponseDTO containing:
+     {
+     "accessToken": "Bearer ${bearerToken}",
+     "role": "ROLE_PATIENT"/"ROLE_PSYCHOLOGIST",
+     "userData":
+        - different for psychologist and therapist -
+     }
+     - 401 UNAUTHORIZED: "Invalid username or password"
+     - 500 INTERNAL SERVER ERROR: Generic error message
+     */
     @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO)
     {
@@ -85,6 +107,24 @@ public class AuthenticationController
         }
     }
 
+    /**
+     ENDPOINT: POST /auth/register/patient
+     FUNCTION: Registers a new user with 'ROLE_PATIENT' authority; Validates that the username is unique and the password meets security complexity.
+     @param registerDTO The DTO containing patient registration details (username, password, age, names).
+     INPUT (JSON):
+     {
+     "username": "patient123",
+     "password": "SecurePassword*",
+     "firstName": "Jane",
+     "lastName": "Smith",
+     "age": 30
+     }
+     @return A string message indicating success or failure of the registration process.
+     OUTPUT:
+     - 200 OK: "Patient registered successfully!"
+     - 400 BAD REQUEST: "Error: Username is already taken!" or password validation error
+     - 500 INTERNAL SERVER ERROR: Error message
+     */
     @PostMapping("register/patient")
     public ResponseEntity<String> registerPatient(@RequestBody PatientRegisterDTO registerDTO) {
         try
@@ -112,6 +152,24 @@ public class AuthenticationController
         }
     }
 
+    /**
+     ENDPOINT: POST /auth/register/patient
+     FUNCTION: Registers a new user with 'ROLE_PSYCHOLOGIST' authority; Validates that the username is unique and the password meets security complexity.
+     @param registerDTO The DTO containing patient registration details (username, password, age, names).
+     INPUT (JSON):
+     {
+     "username": "psychologist1234",
+     "password": "SecurePassword*",
+     "firstName": "Mary",
+     "lastName": "Sue",
+     "age": 40
+     }
+     @return A string message indicating success or failure of the registration process.
+     OUTPUT:
+     - 200 OK: "Psychologist registered successfully!"
+     - 400 BAD REQUEST: "Error: Username is already taken!" or password validation error
+     - 500 INTERNAL SERVER ERROR: Error message
+     */
     @PostMapping("register/psychologist")
     public ResponseEntity<String> registerPsychologist(@RequestBody RegisterDTO registerDTO) {
         try

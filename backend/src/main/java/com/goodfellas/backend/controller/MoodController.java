@@ -23,8 +23,24 @@ public class MoodController
         this.moodService = moodService;
     }
 
+    /**
+     ENDPOINT: POST /mood
+     FUNCTION:
+     Records the user's mood for the current day. The system restricts this to one entry per day via the service logic.
+     @param payload A map containing the mood integer value (key: "value").
+     @param authentication The security context identifying the patient.
+     INPUT (JSON): (Uses the JWT from Authentication Header of User)
+     {
+     "value": 5
+     }
+     (Note: 'value' usually represents a scale from 1 to 10).
+     @return A confirmation message on success or error message on failure.
+     OUTPUT:
+     - 201 CREATED: "Mood submitted successfully!"
+     - 400 BAD REQUEST: Custom error message (e.g. "Mood already submitted for today").
+     */
     @PostMapping
-    public ResponseEntity<String> submitMood(@RequestBody Map<String, Integer> payload, Authentication authentication)
+    public ResponseEntity<String> submitMoodOfPatientForTheDay(@RequestBody Map<String, Integer> payload, Authentication authentication)
     {
         try
         {
@@ -42,8 +58,19 @@ public class MoodController
         }
     }
 
+    /**
+     ENDPOINT: GET /mood
+     FUNCTION:
+     Retrieves the historical list of all mood entries recorded by the authenticated patient.
+     @param authentication The security context identifying the patient.
+     INPUT: None (Uses the JWT from Authentication Header of User)
+     @return A list of all historical mood entries for the user.
+     OUTPUT:
+     - 200 OK: A List of MoodDTO objects.
+     - 401 UNAUTHORIZED: If the user is not logged in.
+     */
     @GetMapping
-    public ResponseEntity<List<MoodDTO>> getMyMoodHistory(Authentication authentication)
+    public ResponseEntity<List<MoodDTO>> getMyMoodHistoryOfPatient(Authentication authentication)
     {
         return ResponseEntity.ok(moodService.getMyMoodHistory(authentication.getName()));
     }

@@ -26,41 +26,94 @@ public class JournalEntryController {
         this.psychologistService = psychologistService;
     }
 
+    /**
+     ENDPOINT: GET /journal
+     FUNCTION: Retrieves all journal entries belonging to the currently authenticated patient.
+     @param authentication The security context containing the current user's details.
+     INPUT: None (However Uses the JWT from the Authorization !!header!! to identify the user).
+     @return A list of journal entries belonging to the authenticated user.
+     OUTPUT:
+     - 200 OK: A List of JournalEntryDTO objects.
+     - 401 UNAUTHORIZED: If the token is missing or invalid.
+     */
     @GetMapping
-    public ResponseEntity<List<JournalEntryDTO>> getMyEntries(Authentication authentication)
+    public ResponseEntity<List<JournalEntryDTO>> getJournalEntriesOfPatient(Authentication authentication)
     {
         return ResponseEntity.ok(journalService.getMyEntries(authentication.getName()));
     }
 
+    /**
+     ENDPOINT: GET /journal/{id}
+     FUNCTION: Retrieves a specific journal entry by its ID, provided the authenticated user owns it.
+     @param id The ID of the journal entry to retrieve.
+     @param authentication The security context containing the current user's details.
+     INPUT: Path Variable: 'id' (Integer). (However Uses the JWT from the Authorization !!header!! to identify the user).
+     @return The specific journal entry DTO.
+     OUTPUT:
+     - 200 OK: The JournalEntryDTO object.
+     - 403 FORBIDDEN: If the user tries to access an entry that doesn't belong to them.
+     - 404 NOT FOUND: If the entry ID does not exist.
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<JournalEntryDTO> getMyEntry(@PathVariable int id, Authentication authentication)
+    public ResponseEntity<JournalEntryDTO> getJournalEntryOfPatientById(@PathVariable int id, Authentication authentication)
     {
         return ResponseEntity.ok(journalService.getEntry(authentication.getName(), id));
     }
 
     /**
-     *
      * @param authentication
      * @return shared journals
      */
     @GetMapping("/shared")
-    public ResponseEntity<List<JournalEntryDTO>> getSharedJournalEntries(
-            Authentication authentication) {
-
-        return ResponseEntity.ok(
-                psychologistService.getSharedJournalEntries(authentication.getName())
-        );
+    public ResponseEntity<List<JournalEntryDTO>> getSharedJournalEntriesOfPatient(Authentication authentication)
+    {
+        return ResponseEntity.ok(psychologistService.getSharedJournalEntries(authentication.getName()));
     }
 
+    /**
+     ENDPOINT: POST /journal
+     FUNCTION: Creates a new journal entry for the authenticated patient.
+     @param dto The data transfer object containing the journal entry content.
+     @param authentication The security context identifying the patient.
+     INPUT (JSON): (However Uses the JWT from the Authorization !!header!! to identify the user).
+     {
+     "title": "My Day",
+     "text": "Today I felt much better",
+     "tags": "progress, happy"
+     }
+     @return A confirmation message indicating the resource was created.
+     OUTPUT:
+     - 201 CREATED: "Journal entry created successfully"
+     - 400 BAD REQUEST: If the user is not found or data is invalid.
+     */
     @PostMapping
-    public ResponseEntity<String> createEntry(@RequestBody JournalEntryDTO dto, Authentication authentication)
+    public ResponseEntity<String> createJournalEntryOfPatient(@RequestBody JournalEntryDTO dto, Authentication authentication)
     {
         journalService.createEntry(authentication.getName(), dto);
         return new ResponseEntity<>("Journal entry created successfully", HttpStatus.CREATED);
     }
 
+    /**
+     ENDPOINT: PUT /journal/{id}
+     FUNCTION:
+     Updates an existing journal entry. The user must be the owner.
+     @param id The ID of the journal entry to update.
+     @param dto The new data to apply to the journal entry.
+     @param authentication The security context identifying the patient.
+     INPUT (JSON): (However Uses the JWT from the Authorization !!header!! to identify the user).
+     {
+     "title": "Updated Title",
+     "text": "Updated content",
+     "tags": "updated"
+     }
+     @return A confirmation message on success or error message on failure.
+     OUTPUT:
+     - 200 OK: "Journal entry updated successfully"
+     - 403 FORBIDDEN: If the user does not own the entry.
+     - 400 BAD REQUEST: If the update logic fails.
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateEntry(@PathVariable int id, @RequestBody JournalEntryDTO dto, Authentication authentication)
+    public ResponseEntity<String> updateJournalEntryOfPatientById(@PathVariable int id, @RequestBody JournalEntryDTO dto, Authentication authentication)
     {
         try
         {
@@ -73,8 +126,19 @@ public class JournalEntryController {
         }
     }
 
+    /**
+     ENDPOINT: DELETE /journal/{id}
+     FUNCTION: Deletes a journal entry. Ownership is verified before deletion.
+     @param id The ID of the journal entry to delete.
+     @param authentication The security context identifying the patient.
+     INPUT: Path Variable: 'id' (Integer). (However Uses the JWT from the Authorization !!header!! to identify the user).
+     @return A confirmation message on success or error message on failure.
+     OUTPUT:
+     - 200 OK: "Journal entry deleted successfully"
+     - 400 BAD REQUEST: If the entry is not found or access is denied.
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteEntry(@PathVariable int id, Authentication authentication)
+    public ResponseEntity<String> deleteJournalEntryOfPatientById(@PathVariable int id, Authentication authentication)
     {
         try
         {
@@ -87,8 +151,19 @@ public class JournalEntryController {
         }
     }
 
+    /**
+     ENDPOINT: PUT /journal/{id}/share
+     FUNCTION: Sets the 'allowPsychologist' flag to true for a specific entry.
+     @param id The ID of the journal entry to share.
+     @param authentication The security context identifying the patient.
+     INPUT: Path Variable: 'id' (Integer).
+     @return A confirmation message on success or error message on failure.
+     OUTPUT:
+     * - 200 OK: "Journal entry shared with your psychologist."
+     * - 400 BAD REQUEST: If the patient is not assigned to a psychologist.
+     */
     @PutMapping("/{id}/share")
-    public ResponseEntity<String> shareWithPsychologist(@PathVariable int id, Authentication authentication)
+    public ResponseEntity<String> shareJournalEntryOfPatientWithPsychologistById(@PathVariable int id, Authentication authentication)
     {
         try
         {
