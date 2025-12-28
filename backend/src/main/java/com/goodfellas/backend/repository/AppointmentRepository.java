@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
     List<Appointment> findByPsychologistIdAndStatusOrderByStartTimeAsc(int psychologistId, AppointmentStatus status);
+    List<Appointment> findByPatientIdAndStatusOrderByStartTimeAsc(int patient, AppointmentStatus status);
     @Query("""
         select count(a) > 0
         from Appointment a
@@ -19,14 +20,4 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
           and a.endTime > :startTime
     """)
     boolean existsOverlapForPsychologist(int psychologistId, LocalDateTime startTime, LocalDateTime endTime);
-
-    @Query("""
-        select a
-        from Appointment a
-        join fetch a.patient p
-        where a.psychologist.id = :psychologistId
-          and (:status is null or a.status = :status)
-        order by a.startTime desc
-    """)
-    List<Appointment> findAllForPsychologistWithPatient(int psychologistId, AppointmentStatus status);
 }

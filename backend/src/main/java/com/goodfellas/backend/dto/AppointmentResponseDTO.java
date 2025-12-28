@@ -1,13 +1,10 @@
 package com.goodfellas.backend.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.goodfellas.backend.model.AppointmentStatus;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor

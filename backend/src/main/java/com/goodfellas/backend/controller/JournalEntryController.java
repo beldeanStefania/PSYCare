@@ -38,6 +38,11 @@ public class JournalEntryController {
         return ResponseEntity.ok(journalService.getEntry(authentication.getName(), id));
     }
 
+    /**
+     *
+     * @param authentication
+     * @return shared journals
+     */
     @GetMapping("/shared")
     public ResponseEntity<List<JournalEntryDTO>> getSharedJournalEntries(
             Authentication authentication) {

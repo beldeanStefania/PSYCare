@@ -3,15 +3,11 @@ package com.goodfellas.backend.service;
 import com.goodfellas.backend.dto.AppointmentResponseDTO;
 import com.goodfellas.backend.dto.AppointmentRequestDTO;
 import com.goodfellas.backend.model.Appointment;
-import com.goodfellas.backend.model.Patient;
-import com.goodfellas.backend.model.Psychologist;
 import com.goodfellas.backend.repository.AppointmentRepository;
 import com.goodfellas.backend.repository.PatientRepository;
 import com.goodfellas.backend.repository.PsychologistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,11 +29,30 @@ public class AppointmentService {
         this.patientRepository = patientRepository;
     }
 
-    public List<AppointmentResponseDTO> getAllBookedAppointments(final String username) {
+    public List<AppointmentResponseDTO> getAppointmentsForPsychologist(final String username) {
         var psychologist = psychologistRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Psychologist not found for username: " + username));
+                .orElseThrow(() -> new RuntimeException("Psychologist not found with username: " + username));
 
         return appointmentRepository.findByPsychologistIdAndStatusOrderByStartTimeAsc(psychologist.getId(), BOOKED).stream()
+                .map(a -> {
+                    AppointmentResponseDTO dto = new AppointmentResponseDTO();
+                    dto.setId(a.getId());
+                    dto.setStartTime(a.getStartTime());
+                    dto.setEndTime(a.getEndTime());
+                    dto.setStatus(a.getStatus());
+                    dto.setPatientId(a.getPatient().getId());
+                    dto.setPatientFirstName(a.getPatient().getFirstName());
+                    dto.setPatientLastName(a.getPatient().getLastName());
+                    return dto;
+                })
+                .toList();
+    }
+
+    public List<AppointmentResponseDTO> getAppointmentsForPatient(final String username) {
+        var patient = patientRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Patient not found with username: " + username));
+
+        return appointmentRepository.findByPsychologistIdAndStatusOrderByStartTimeAsc(patient.getId(), BOOKED).stream()
                 .map(a -> {
                     AppointmentResponseDTO dto = new AppointmentResponseDTO();
                     dto.setId(a.getId());
@@ -55,10 +70,10 @@ public class AppointmentService {
     public void bookAppointment(String psychologistUsername, AppointmentRequestDTO req) {
         validateRequest(req);
 
-        Psychologist psychologist = psychologistRepository.findByUsername(psychologistUsername)
+        var psychologist = psychologistRepository.findByUsername(psychologistUsername)
                 .orElseThrow(() -> new RuntimeException("Psychologist not found"));
 
-        Patient patient = patientRepository.findById(req.getId())
+        var patient = patientRepository.findById(req.getId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         if (patient.getPsychologist() == null || patient.getPsychologist().getId() != psychologist.getId()) {
@@ -66,10 +81,10 @@ public class AppointmentService {
         }
 
         if (appointmentRepository.existsOverlapForPsychologist(psychologist.getId(), req.getStartTime(), req.getEndTime())) {
-            throw new RuntimeException("aici ii pb");
+            throw new RuntimeException("Invalid date. Check again");
         }
 
-        Appointment appointment = new Appointment();
+        var appointment = new Appointment();
         appointment.setPsychologist(psychologist);
         appointment.setPatient(patient);
         appointment.setStartTime(req.getStartTime());

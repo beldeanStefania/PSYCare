@@ -1,16 +1,15 @@
 package com.goodfellas.backend.service;
 
 import com.goodfellas.backend.dto.PatientViewDTO;
-import com.goodfellas.backend.model.Patient;
 import com.goodfellas.backend.model.Psychologist;
 import com.goodfellas.backend.repository.PatientRepository;
 import com.goodfellas.backend.repository.PsychologistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 public class PatientService {
@@ -23,8 +22,17 @@ public class PatientService {
         this.psychologistRepository = psychologistRepository;
     }
 
-    public List<Patient> getUnassignedPatients() {
-        return patientRepository.findByPsychologistIsNull();
+    public List<PatientViewDTO> getUnassignedPatients() {
+
+        return patientRepository.findByPsychologistIsNull().stream()
+                .map(p -> new PatientViewDTO(
+                        p.getId(),
+                        p.getFirstName(),
+                        p.getLastName(),
+                        p.getAge(),
+                        p.getUsername()
+                ))
+                .toList();
     }
 
     public List<PatientViewDTO> getAssignedPatients(String username) {
@@ -43,15 +51,18 @@ public class PatientService {
     }
 
     public void assignPatientToPsychologist(String psychologistUsername, int patientId) {
-        Psychologist psychologist = psychologistRepository.findByUsername(psychologistUsername)
+        var psychologist = psychologistRepository.findByUsername(psychologistUsername)
                 .orElseThrow(() -> new RuntimeException("Psychologist not found"));
 
-        Patient patient = patientRepository.findById(patientId)
+        var patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        if (patient.getPsychologist() != null && patient.getPsychologist().getId() != psychologist.getId()) {
-            throw new RuntimeException("Patient is already assigned to another psychologist");
-        }
+        ofNullable(patient.getPsychologist())
+                .map(Psychologist::getId)
+                .filter(id -> !id.equals(psychologist.getId()))
+                .ifPresent(e -> {
+                    throw new RuntimeException("Patient is already assigned to another psychologist");
+                });
 
         patient.setPsychologist(psychologist);
         patientRepository.save(patient);
