@@ -196,6 +196,20 @@ public class AuthenticationController
         }
     }
 
+    /**
+     ENDPOINT: POST /auth/logout
+     FUNCTION: "Logs" the user out. While this is largely a client-side action (deleting the JWT token!!!), this endpoint ensures the server context is cleared and provides a standardized hook for the frontend.
+     INPUT: None (Header Authorization required if you want to restrict logout to logged-in users).
+     OUTPUT:
+     200 OK: "Logout successful"
+     */
+    @PostMapping("logout")
+    public ResponseEntity<String> logout()
+    {
+        SecurityContextHolder.clearContext();
+        return new ResponseEntity<>("Logout successful", HttpStatus.OK);
+    }
+
     private boolean isValidPassword(String password)
     {
         if (password == null || password.length() < 4)
