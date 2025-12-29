@@ -40,6 +40,7 @@ public class PsychologistService {
                     dto.setTags(je.getTags());
                     dto.setDate(je.getDate());
                     dto.setAllowPsychologist(je.isAllowPsychologist());
+                    dto.setPatientId(je.getPatient().getId());
                     return dto;
                 })
                 .toList();

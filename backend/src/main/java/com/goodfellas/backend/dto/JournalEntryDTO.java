@@ -12,4 +12,5 @@ public class JournalEntryDTO
     private String tags;
     private LocalDateTime date;
     private boolean allowPsychologist;
+    private int patientId;
 }

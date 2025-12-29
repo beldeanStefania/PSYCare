@@ -50,6 +50,7 @@ public class JournalEntryService
         entry.setAllowPsychologist(false);
         entry.setPatient(patient);
 
+
         journalRepository.save(entry);
     }
 
@@ -105,6 +106,7 @@ public class JournalEntryService
         dto.setTags(entry.getTags());
         dto.setDate(entry.getDate());
         dto.setAllowPsychologist(entry.isAllowPsychologist());
+        dto.setPatientId(entry.getPatient().getId());
         return dto;
     }
 }
