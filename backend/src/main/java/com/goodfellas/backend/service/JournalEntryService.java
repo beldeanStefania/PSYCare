@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @Service
 public class JournalEntryService
 {
-
     private final JournalEntryRepository journalRepository;
     private final PatientRepository patientRepository;
 
@@ -49,7 +48,6 @@ public class JournalEntryService
         entry.setDate(LocalDateTime.now());
         entry.setAllowPsychologist(false);
         entry.setPatient(patient);
-
 
         journalRepository.save(entry);
     }
