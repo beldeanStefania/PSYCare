@@ -74,4 +74,15 @@ public class MoodController
     {
         return ResponseEntity.ok(moodService.getMyMoodHistory(authentication.getName()));
     }
+
+    @GetMapping("/today")
+    public ResponseEntity<MoodDTO> getTodayMood(Authentication auth)
+    {
+        String username = auth.getName();
+
+        return moodService.getTodayMood(username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
 }
